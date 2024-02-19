@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - 'packages/**'
-      - '!packages/config-*/**'
+      - '!packages/config-eslint/**'
       - '.changeset/**'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
