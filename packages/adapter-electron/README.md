@@ -4,6 +4,13 @@
 
 This is a simple wrapper for the existing `adapter-node` SvelteKit adapter, with the exception that this package exports custom functions to handle the integration and running of the polka server and handler that are built from the node adapter.
 
+This adapter requires additional files and configuration to work properly.
+An example of a working electron app can be found in the `examples` directory [here](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron).
+
+This package uses `electron-builder` to build the electron app, and `electron-is-dev` to determine if the app is running in development mode.
+
+Below is an example of how to use this adapter in your main electron file.
+
 ```js
 import { app, BrowserWindow } from 'electron';
 import { start, load } from 'adapter-electron/functions';

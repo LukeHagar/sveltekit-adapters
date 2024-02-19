@@ -6,6 +6,16 @@
     "index.js",
     "index.d.ts"
   ],
+  "author": {
+    "name": "Luke Hagar",
+    "email": "lukeslakemail@gmai.com",
+    "url": "https://lukehagar.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukehagar/sveltekit-adapters.git",
+    "directory": "packages/adapter-electron"
+  },
   "types": "index.d.ts",
   "exports": {
     ".": {
@@ -22,17 +32,10 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^4.0.1",
-    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/kit": "^2.4.0",
     "@sveltejs/package": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
-    "@types/mime-types": "^2.1.4",
     "@types/node": "^20.11.17",
-    "electron-is-dev": "^3.0.1",
-    "electron-log": "^5.1.1",
-    "electron-util": "^0.18.0",
-    "esbuild": "^0.20.0",
-    "micro": "^9.3.4",
-    "polka": "^0.5.2",
     "prettier": "^3.1.1",
     "prettier-plugin-svelte": "^3.1.2",
     "publint": "^0.1.9",
@@ -43,7 +46,9 @@
     "vite": "^5.0.11"
   },
   "dependencies": {
-    "mime-types": "^2.1.35"
+    "polka": "^0.5.2",
+    "electron-is-dev": "^3.0.1",
+    "electron-log": "^5.1.1"
   },
   "type": "module"
 }

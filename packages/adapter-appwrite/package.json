@@ -6,6 +6,16 @@
     "index.js",
     "index.d.ts"
   ],
+  "author": {
+    "name": "Luke Hagar",
+    "email": "lukeslakemail@gmai.com",
+    "url": "https://lukehagar.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukehagar/sveltekit-adapters.git",
+    "directory": "packages/adapter-appwrite"
+  },
   "types": "index.d.ts",
   "exports": {
     ".": {
