@@ -1,5 +1,11 @@
 # adapter-appwrite
 
+## 1.0.2
+
+### Patch Changes
+
+- edfe881: Updated various items
+
 ## 1.0.1
 
 ### Patch Changes
