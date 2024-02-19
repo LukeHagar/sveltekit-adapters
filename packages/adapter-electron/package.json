@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^4.0.1",
-    "@sveltejs/kit": "^2.4.0",
+    "@sveltejs/kit": "^2.4.3",
     "@sveltejs/package": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/node": "^20.11.17",
