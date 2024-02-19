@@ -1,81 +1,37 @@
-# Turborepo starter
+# SvelteKit Adapters
 
-This is an official starter Turborepo.
+This repo contains the below adapters and example implementations for each adapter.
 
-## Using this example
+## Appwrite adapter
 
-Run the following command:
+[Adapter](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-appwrite) | [Example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/appwrite)  
 
-```sh
-npx create-turbo@latest
-```
+Deploy SvelteKit applications as appwrite functions.
+
+I have tested and validated the implementation with the node20 runtime. Other runtimes may work but have not been tested.
+
+## Electron adapter
+
+[Adapter](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-electron) | [Example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron)  
+
+Deploy SvelteKit applications as electron desktop applications.
+
+This adapter is functional and tested, but is currently being blocked by [this PR](https://github.com/alex8088/electron-vite/pull/412).  
+Once that PR is merged, this adapter will be fully functional.  
+
+This adapter does require additional files to be added to the project, and requires the use of the package `electron-vite` to properly handle the electron implementation.  
+Please look at the [example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron) implementation for more information.
 
 ## What's inside?
 
-This Turborepo includes the following packages/apps:
+This repo includes the following packages and examples:
 
-### Apps and Packages
+### Examples
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `appwrite`: a [SvelteKit](https://kit.svelte.dev) example app that uses the `adapter-appwrite` adapter [[Link](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/appwrite)]  
+- `electron`: a [SvelteKit](https://kit.svelte.dev) example app that uses the `adapter-electron` adapter [[Link](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron)]
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Packages
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+- `adapter-appwrite`: a [SvelteKit](https://kit.svelte.dev) adapter for deploying applications as appwrite functions [[Link](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-appwrite)]
+- `adapter-electron`: a [SvelteKit](https://kit.svelte.dev) adapter for deploying applications as electron desktop applications [[Link](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-electron)]
