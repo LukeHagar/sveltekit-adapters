@@ -4,6 +4,8 @@
 
 This is a SvelteKit adapter to compile SvleteKit apps to run as Appwrite functions.
 
+When configuring your Appwrite function you will specify the entry point as `build/entry.js`.  
+
 Below is an example of how to use this adapter in your SvelteKit project.
 
 ```js
