@@ -1,5 +1,11 @@
 # adapter-electron
 
+## 1.0.3
+
+### Patch Changes
+
+- 5c9c021: Adjusted readme, as blocked `electron-vite` PR has been merged
+
 ## 1.0.2
 
 ### Patch Changes
