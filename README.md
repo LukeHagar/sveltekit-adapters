@@ -16,9 +16,6 @@ I have tested and validated the implementation with the node20 runtime. Other ru
 
 Deploy SvelteKit applications as electron desktop applications.
 
-This adapter is functional and tested, but is currently being blocked by [this PR](https://github.com/alex8088/electron-vite/pull/412).  
-Once that PR is merged, this adapter will be fully functional.  
-
 This adapter does require additional files to be added to the project, and requires the use of the package `electron-vite` to properly handle the electron implementation.  
 Please look at the [example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron) implementation for more information.
 
