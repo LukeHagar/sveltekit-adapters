@@ -1,5 +1,11 @@
 # adapter-electron
 
+## 1.0.4
+
+### Patch Changes
+
+- 0ab4be1: fixed package exports
+
 ## 1.0.3
 
 ### Patch Changes
