@@ -2,7 +2,7 @@
   "name": "adapter-electron",
   "version": "1.0.3",
   "files": [
-    "files",
+    "functions",
     "index.js",
     "index.d.ts"
   ],
