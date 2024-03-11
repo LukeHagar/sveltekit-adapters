@@ -1,5 +1,11 @@
 # adapter-electron
 
+## 1.0.5
+
+### Patch Changes
+
+- 1006c9f: Adjusted local address origin for compatibility
+
 ## 1.0.4
 
 ### Patch Changes
