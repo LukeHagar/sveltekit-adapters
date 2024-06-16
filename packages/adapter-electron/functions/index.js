@@ -31,12 +31,12 @@ export const start = async () => {
 };
 
 /** @type {import('./index.js').load} */
-export const load = (mainWindow, port) => {
+export const load = (mainWindow, port, path = '') => {
   if (isDev && process.env['ELECTRON_RENDERER_URL']) {
-    log.info(`Loading url: ${process.env['ELECTRON_RENDERER_URL']}`);
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    log.info(`Loading url: ${process.env['ELECTRON_RENDERER_URL']}${path}`);
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']+path);
   } else {
-    log.info(`Loading url: http://localhost:${port}`);
-    mainWindow.loadURL(`http://localhost:${port}`);
+    log.info(`Loading url: http://localhost:${port}${path}`);
+    mainWindow.loadURL(`http://localhost:${port}${path}`);
   }
 };
