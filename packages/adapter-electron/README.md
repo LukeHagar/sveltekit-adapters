@@ -1,97 +1,110 @@
-# adapter-electron
+# @sveltejs/adapter-electron
 
-## A SvelteKit adapter for Electron Desktop Apps using protocol interception
-
-This adapter provides a complete solution for building Electron desktop applications with SvelteKit by **embedding the full SvelteKit app directly into the Electron main process**. It uses protocol interception to handle all routing, SSR, and API endpoints without requiring a separate HTTP server.
+A SvelteKit adapter for Electron desktop apps that uses native protocol handling for production and seamless Vite dev server integration for development.
 
 ## Features
 
-### 🚀 **Embedded SvelteKit**
-- **Full SvelteKit app** embedded in Electron main process
-- **Server-side rendering** for all routes
-- **API endpoints** handled natively
-- **Static asset serving** via custom protocol
-
-### 🔄 **Protocol Interception**
-- **HTTP protocol interception** for SvelteKit routes
-- **Custom file protocol** for static assets
-- **No external HTTP server** required
-- **Seamless development and production** experience
-
-### ⚡ **Performance Optimizations**
-- **Response caching** with configurable TTL
-- **Automatic cache cleanup** to prevent memory leaks
-- **Efficient static file serving** from built assets
-- **Minimal overhead** compared to external servers
-
-### 🛠️ **Developer Experience**
-- **Hot reload** support in development
-- **Comprehensive logging** for debugging
-- **Easy configuration** with sensible defaults
-- **TypeScript support** throughout
+- ✅ **Native Protocol Handling**: Uses Electron's `protocol.handle()` API for production
+- ✅ **Development Integration**: Seamless Vite dev server integration with HMR
+- ✅ **No HTTP Server**: Bypasses Node.js HTTP servers entirely in production
+- ✅ **Full SvelteKit Support**: SSR, API routes, static assets, prerendered pages, form actions
+- ✅ **Clean Architecture**: All Electron integration code is encapsulated
+- ✅ **Production Ready**: Works with electron-builder and similar tools
+- ✅ **TypeScript Support**: Full type definitions included
+- ✅ **Proper Error Handling**: User-friendly error reporting with GitHub issue links
 
 ## Installation
 
 ```bash
-npm install adapter-electron
+npm install @sveltejs/adapter-electron
 ```
 
-## Basic Setup
+## Quick Start
 
 ### 1. Configure SvelteKit
 
+In your `svelte.config.js`:
+
 ```js
-// svelte.config.js
-import adapter from 'adapter-electron';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from '@sveltejs/adapter-electron';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: vitePreprocess(),
-
 	kit: {
-		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
-		// If your environment is not supported or you settled on a specific environment, switch out the adapter.
-		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
-		adapter: adapter()
+		adapter: adapter({
+			// All options are optional with sensible defaults
+			out: 'out',                    // Output directory (default: 'out')
+			assets: true,                  // Include static assets (default: true)
+			fallback: undefined,           // Fallback page for client-side routing (default: undefined)
+			precompress: false,            // Precompress assets (default: false)
+			strict: true                   // Strict mode (default: true)
+		})
 	}
 };
 
 export default config;
 ```
 
-### 2. Set up Electron Main Process
+### 2. Set up Vite Configuration
 
-```js
-// src/main/index.js
+In your `vite.config.ts`:
+
+```ts
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import { electronPlugin } from 'adapter-electron';
+
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		electronPlugin({
+			// Auto-detects src/main.ts and src/preload.ts by default
+			// Override paths if needed:
+			// mainEntry: 'src/main.ts',        // Main process entry (default: 'src/main.ts')
+			// preloadEntry: 'src/preload.ts',  // Preload script entry (default: 'src/preload.ts')
+			// mainOut: 'out/main/index.js',    // Main output (default: 'out/main/index.js')
+			// preloadOut: 'out/preload/index.js' // Preload output (default: 'out/preload/index.js')
+		})
+	]
+});
+```
+
+### 3. Create Electron Main Process
+
+Create `src/main.ts`:
+
+```ts
 import { app, BrowserWindow } from 'electron';
-import { start, load, protocolUtils } from 'adapter-electron/functions';
-import isDev from 'electron-is-dev';
-import log from 'electron-log/main';
-import nodePath from 'node:path';
+import { setupHandler, getPreloadPath, registerAppScheme } from 'adapter-electron/functions/setupHandler';
 
-const port = await start();
+let mainWindow: BrowserWindow | null = null;
+let stopIntercept: (() => void) | undefined;
+
+// IMPORTANT: Register the app scheme before app.ready
+registerAppScheme();
 
 async function createWindow() {
-	const mainWindow = new BrowserWindow({
+	mainWindow = new BrowserWindow({
 		width: 1200,
 		height: 800,
 		webPreferences: {
-			preload: nodePath.join(__dirname, '../preload/index.mjs'),
+			preload: getPreloadPath(),  // Auto-configured preload path
+			contextIsolation: true,
 			nodeIntegration: false,
-			contextIsolation: true
+			webSecurity: true
 		}
 	});
 
-	// Load the app - all routing is handled by protocol interception
-	load(mainWindow, port);
+	mainWindow.on('closed', () => {
+		mainWindow = null;
+		stopIntercept?.();
+	});
 
-	if (isDev) {
-		mainWindow.webContents.openDevTools();
-	}
+	// Setup the protocol handler (handles dev vs prod automatically)
+	stopIntercept = await setupHandler(mainWindow);
 }
 
-app.whenReady().then(createWindow);
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
@@ -99,201 +112,262 @@ app.on('window-all-closed', () => {
 	}
 });
 
-// Optional: Configure protocol settings
-protocolUtils.configure({
-	baseUrl: 'http://localhost:3000',
-	staticProtocol: 'app',
-	enableCaching: true,
-	cacheTimeout: 300000 // 5 minutes
+app.on('activate', async () => {
+	if (BrowserWindow.getAllWindows().length === 0 && !mainWindow) {
+		await createWindow();
+	}
 });
+```
+
+### 4. Create Preload Script
+
+Create `src/preload.ts`:
+
+```ts
+// Your preload script content
+console.log('Preload loaded');
+
+// Example: Expose APIs to renderer process
+import { contextBridge } from 'electron';
+
+contextBridge.exposeInMainWorld('electronAPI', {
+	// Your APIs here
+});
+```
+
+### 5. Build and Run
+
+```bash
+# Development (uses Vite dev server with HMR)
+npm run dev
+
+# Production build
+npm run build
+
+# Run built Electron app
+npm start  # or your preferred Electron launcher
 ```
 
 ## How It Works
 
-### **Protocol Interception**
-The adapter uses Electron's protocol API to intercept all HTTP requests to your SvelteKit app:
+### Development Mode
+- Uses Vite dev server (`http://localhost:5173` by default)
+- Full hot module replacement (HMR) support
+- No protocol interception needed
+- Set `VITE_DEV_SERVER` environment variable to customize dev server URL
 
-1. **HTTP Protocol Interception**: All requests to `http://localhost:3000/*` are intercepted
-2. **SvelteKit Handler**: Requests are routed through SvelteKit's built handler
-3. **Static Asset Protocol**: Static files are served via a custom `app://` protocol
-4. **Response Caching**: Successful responses are cached for performance
+### Production Mode
+The adapter uses Electron's native `protocol.handle()` API to intercept `http://127.0.0.1` requests:
 
-### **Request Flow**
-```
-Browser Request → Protocol Interception → SvelteKit Handler → Response
-```
+1. **Static Assets**: Serves files from the `client/` directory
+2. **Prerendered Pages**: Serves static HTML from the `prerendered/` directory  
+3. **SSR/API Routes**: Calls SvelteKit's `Server.respond()` directly
+4. **Form Actions**: Full support for SvelteKit form actions
+5. **Cookie Handling**: Automatic cookie synchronization with Electron session
 
-### **Static Assets**
+### Build Output Structure
+
+After running `npm run build`, you'll have:
+
 ```
-Static Asset Request → Custom Protocol → File System → Response
+out/
+├── client/                  # SvelteKit client assets (JS, CSS, images)
+├── server/                  # SvelteKit server files for SSR
+│   ├── index.js            # SvelteKit server
+│   ├── manifest.js         # App manifest
+│   └── chunks/             # Server chunks
+├── prerendered/            # Prerendered static HTML pages
+├── functions/              # Protocol handler code
+│   ├── setupHandler.js     # Main protocol handler
+│   └── setupHandler.d.ts   # TypeScript definitions
+├── main/                   # Compiled main process
+│   └── index.js
+└── preload/                # Compiled preload script
+    └── index.js
 ```
 
 ## Configuration Options
 
-### **Protocol Configuration**
+### SvelteKit Adapter Options
 
 ```js
-import { protocolUtils } from 'adapter-electron/functions';
-
-protocolUtils.configure({
-	baseUrl: 'http://localhost:3000',        // Base URL for SvelteKit app
-	staticProtocol: 'app',                   // Protocol for static assets
-	enableCaching: true,                     // Enable response caching
-	cacheTimeout: 300000                     // Cache TTL in milliseconds
-});
+adapter({
+	out: 'out',              // Output directory
+	assets: true,            // Include static assets from /static
+	fallback: undefined,     // Fallback page for client-side routing
+	precompress: false,      // Precompress assets with gzip/brotli
+	strict: true             // Enable strict mode
+})
 ```
 
-### **Cache Management**
+### Electron Plugin Options
 
 ```js
-// Clear all cached responses
-protocolUtils.clearCache();
+electronPlugin({
+	mainEntry: 'src/main.ts',           // Main process entry point
+	preloadEntry: 'src/preload.ts',     // Preload script entry point  
+	mainOut: 'out/main/index.js',       // Main process output
+	preloadOut: 'out/preload/index.js'  // Preload script output
+})
+```
 
-// Get cache statistics
-const stats = protocolUtils.getCacheStats();
-console.log(`Cache enabled: ${stats.enabled}, Size: ${stats.size}`);
+### Environment Variables
 
-// Manual cache cleanup
-protocolUtils.cleanupCache();
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_DEV_SERVER` | Development server URL | `http://localhost:5173` |
+| `VITE_APP_URL` | Production app URL | `http://127.0.0.1` |
+
+## API Reference
+
+### Protocol Handler Functions
+
+#### `setupHandler(mainWindow: BrowserWindow): Promise<() => void>`
+
+Sets up the protocol handler and loads the appropriate URL based on environment.
+
+- **Development**: Loads Vite dev server
+- **Production**: Sets up protocol interception and loads app
+- **Returns**: Cleanup function to stop protocol interception
+
+#### `registerAppScheme(): void`
+
+Registers the HTTP scheme as privileged. **Must be called before `app.ready`.**
+
+#### `getPreloadPath(): string`
+
+Returns the correct preload script path for current environment.
+
+- **Development**: Points to source preload script
+- **Production**: Points to built preload script
+
+### Request Flow
+
+```
+Development:
+Electron Window → Vite Dev Server (http://localhost:5173)
+                     ↓
+                 Hot Module Replacement
+
+Production:
+Electron Request (http://127.0.0.1/page)
+    ↓
+Protocol Handler
+    ↓
+1. Check static files (client/)
+2. Check prerendered pages (prerendered/)  
+3. Handle SSR/API (server.respond())
+    ↓
+Response with Cookie Sync
 ```
 
 ## Advanced Usage
 
-### **Custom Protocol Configuration**
+### Custom Error Handling
 
-```js
-// Use a custom base URL
-protocolUtils.configure({
-	baseUrl: 'http://myapp.local',
-	staticProtocol: 'myapp-assets'
-});
+The adapter includes built-in error reporting. Errors are:
+- Logged to console in development
+- Shown as dialog boxes in production
+- Include GitHub issue reporting instructions
 
-// Disable caching for development
-if (isDev) {
-	protocolUtils.configure({
-		enableCaching: false
-	});
+### Cookie Management
+
+Cookies are automatically synchronized between SvelteKit and Electron's session:
+- Request cookies are extracted from Electron session
+- Response `Set-Cookie` headers are applied to Electron session
+- Supports all cookie attributes (secure, httpOnly, etc.)
+
+### Security Features
+
+- Path traversal protection for static files
+- Automatic CORS handling
+- Secure cookie handling
+- Context isolation enforced
+
+## Production Packaging
+
+### With electron-builder
+
+```json
+{
+  "scripts": {
+    "build": "vite build",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "directories": {
+      "output": "dist",
+      "buildResources": "out"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "assets/icon.icns"
+    },
+    "win": {
+      "icon": "assets/icon.ico"
+    }
+  }
 }
 ```
 
-### **Performance Monitoring**
+### With electron-forge
 
 ```js
-// Monitor cache performance
-setInterval(() => {
-	const stats = protocolUtils.getCacheStats();
-	if (stats.enabled) {
-		console.log(`Cache size: ${stats.size} entries`);
-	}
-}, 30000); // Every 30 seconds
-```
-
-### **Error Handling**
-
-```js
-// The adapter automatically handles errors and provides logging
-// You can also add custom error handling in your main process
-
-app.on('render-process-gone', (event, webContents, details) => {
-	console.error('Render process crashed:', details.reason);
-	// Restart the window or handle the crash
-});
-```
-
-## Development vs Production
-
-### **Development Mode**
-- Uses external dev server when available
-- Hot reload support
-- Detailed logging
-- Cache disabled by default
-
-### **Production Mode**
-- Full protocol interception
-- Response caching enabled
-- Optimized static asset serving
-- Minimal logging
-
-## API Reference
-
-### **Core Functions**
-
-- `start()` - Initialize the protocol manager and set up interception
-- `load(mainWindow, port, path)` - Load the app in an Electron window
-- `protocolUtils.configure(options)` - Configure protocol settings
-- `protocolUtils.clearCache()` - Clear all cached responses
-- `protocolUtils.getCacheStats()` - Get cache statistics
-- `protocolUtils.cleanupCache()` - Clean up expired cache entries
-
-### **Configuration Options**
-
-```typescript
-interface ProtocolOptions {
-	baseUrl?: string;           // Base URL for SvelteKit app
-	staticProtocol?: string;    // Protocol for static assets
-	enableCaching?: boolean;    // Enable response caching
-	cacheTimeout?: number;      // Cache TTL in milliseconds
-}
+// forge.config.js
+module.exports = {
+  packagerConfig: {
+    dir: './out'
+  },
+  makers: [
+    {
+      name: '@electron-forge/maker-squirrel',
+      config: {}
+    }
+  ]
+};
 ```
 
 ## Troubleshooting
 
-### **Common Issues**
+### Common Issues
 
-1. **App not loading**: Check that the SvelteKit build exists in the expected location
-2. **Static assets not loading**: Verify the static protocol is correctly configured
-3. **Performance issues**: Enable caching and adjust cache timeout
-4. **Memory leaks**: Ensure cache cleanup is running periodically
+**Protocol not working in production:**
+- Ensure `registerAppScheme()` is called before `app.ready`
+- Check that `setupHandler()` is called after window creation
 
-### **Debug Mode**
+**Development server not loading:**
+- Verify Vite dev server is running on expected port
+- Set `VITE_DEV_SERVER` environment variable if using custom port
 
-Enable detailed logging by setting the environment variable:
+**Form actions not working:**
+- Ensure you're using proper Web API Request objects (handled automatically)
+- Check that cookies are being synchronized properly
 
-```bash
-DEBUG=electron-protocol npm run dev
-```
+**Build errors:**
+- Verify all dependencies are installed
+- Check that TypeScript configuration includes Electron types
 
-### **Cache Issues**
+### Debug Mode
 
-If you're experiencing stale content:
+Enable verbose logging:
 
 ```js
-// Clear cache manually
-protocolUtils.clearCache();
-
-// Or disable caching temporarily
-protocolUtils.configure({ enableCaching: false });
+// In main process
+process.env.ELECTRON_ENABLE_LOGGING = 'true';
 ```
 
-## Migration from Standard Adapter
+### Getting Help
 
-If you're migrating from the standard adapter-electron:
+If you encounter issues:
 
-1. **Update imports** to include protocolUtils
-2. **Remove any external server setup** - it's no longer needed
-3. **Configure protocol settings** as needed
-4. **Test static asset loading** with the new protocol
-
-The adapter maintains backward compatibility while providing the new protocol-based functionality.
-
-## Performance Benefits
-
-### **Compared to External Server**
-- **Faster startup** - no server initialization
-- **Lower memory usage** - no separate Node.js process
-- **Better integration** - direct access to Electron APIs
-- **Simplified deployment** - single executable
-
-### **Caching Benefits**
-- **Reduced computation** - cached SSR responses
-- **Faster navigation** - cached API responses
-- **Better user experience** - instant page loads
-
-## Contributing
-
-This adapter is part of the SvelteKit adapters collection. Contributions are welcome!
+1. Check the console for error messages
+2. Verify your configuration matches the examples
+3. File an issue with error details and reproduction steps
 
 ## License
 
-MIT License - see the main repository for details.
+MIT
 
