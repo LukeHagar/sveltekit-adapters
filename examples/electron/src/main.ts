@@ -57,4 +57,3 @@ app.on('activate', async () => {
 		}
 	}
 });
-});
