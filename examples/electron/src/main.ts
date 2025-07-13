@@ -34,9 +34,7 @@ async function createWindow() {
 		stopIntercept?.();
 	});
 
-	await app.whenReady();
-
-	// Third setup the handler
+	// Setup the handler
 	stopIntercept = await setupHandler(mainWindow);
 
 	return mainWindow;
