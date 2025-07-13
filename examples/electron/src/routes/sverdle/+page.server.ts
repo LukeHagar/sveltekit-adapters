@@ -30,7 +30,14 @@ export const load = (({ cookies }) => {
 
 		return gameState
 	} catch (e) {
-		console.log("Error getting cookie", e);
+		console.error("Error loading game state:", e);
+		// Return a new game state as fallback
+		const newGame = new Game();
+		return {
+			guesses: newGame.guesses,
+			answers: newGame.answers,
+			answer: null
+		};
 	}
 }) satisfies PageServerLoad;
 

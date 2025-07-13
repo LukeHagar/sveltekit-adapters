@@ -34,9 +34,7 @@ async function createWindow() {
 		stopIntercept?.();
 	});
 
-	await app.whenReady();
-
-	// Third setup the handler
+	// Setup the handler
 	stopIntercept = await setupHandler(mainWindow);
 
 	return mainWindow;
@@ -52,6 +50,11 @@ app.on('window-all-closed', () => {
 
 app.on('activate', async () => {
 	if (BrowserWindow.getAllWindows().length === 0 && !mainWindow) {
-		await createWindow();
+		try {
+			await createWindow();
+		} catch (error) {
+			console.error('Failed to create window:', error);
+		}
 	}
+});
 });
