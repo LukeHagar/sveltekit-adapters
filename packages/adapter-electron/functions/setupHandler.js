@@ -285,7 +285,7 @@ export async function setupHandler(mainWindow) {
   await mainWindow.loadURL(url);
 
   return function stopIntercept() {
-    protocol.unhandle('http');
+    protocol.unhandle(Protocol);
   };
 }
 
