@@ -19,16 +19,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 8
+        
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
-        
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -39,22 +39,22 @@ jobs:
         pnpm test
         
     - name: Run adapter-appwrite tests (if exists)
-      run: |
-        if [ -f "packages/adapter-appwrite/package.json" ]; then
-          cd packages/adapter-appwrite
-          if grep -q '"test"' package.json; then
-            pnpm test
+              run: |
+          if [ -f "packages/adapter-appwrite/package.json" ]; then
+            cd packages/adapter-appwrite
+            if grep -q '"test"' package.json; then
+              pnpm test
+            else
+              echo "No tests found for adapter-appwrite"
+            fi
           else
-            echo "No tests found for adapter-appwrite"
+            echo "adapter-appwrite package not found"
           fi
-        else
-          echo "adapter-appwrite package not found"
-        fi
-        
-    - name: Generate test coverage
-      run: |
-        cd packages/adapter-electron
-        pnpm run test:coverage
+          
+      - name: Generate test coverage
+        run: |
+          cd packages/adapter-electron
+          pnpm run test:coverage
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -72,16 +72,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 8
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'pnpm'
-        
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -92,39 +92,39 @@ jobs:
         pnpm run typecheck
         
     - name: Type check adapter-appwrite
-      run: |
-        if [ -f "packages/adapter-appwrite/package.json" ]; then
-          cd packages/adapter-appwrite
-          if grep -q '"typecheck"' package.json; then
-            pnpm run typecheck
+              run: |
+          if [ -f "packages/adapter-appwrite/package.json" ]; then
+            cd packages/adapter-appwrite
+            if grep -q '"typecheck"' package.json; then
+              pnpm run typecheck
+            else
+              echo "No typecheck script found for adapter-appwrite"
+            fi
           else
-            echo "No typecheck script found for adapter-appwrite"
+            echo "adapter-appwrite package not found"
           fi
-        else
-          echo "adapter-appwrite package not found"
-        fi
         
     - name: Type check examples
-      run: |
-        # Type check electron example
-        if [ -f "examples/electron/package.json" ]; then
-          cd examples/electron
-          if grep -q '"check"' package.json; then
-            pnpm run check
-          else
-            echo "No check script found for electron example"
+              run: |
+          # Type check electron example
+          if [ -f "examples/electron/package.json" ]; then
+            cd examples/electron
+            if grep -q '"check"' package.json; then
+              pnpm run check
+            else
+              echo "No check script found for electron example"
+            fi
           fi
-        fi
-        
-        # Type check appwrite example
-        if [ -f "examples/appwrite/package.json" ]; then
-          cd examples/appwrite
-          if grep -q '"check"' package.json; then
-            pnpm run check
-          else
-            echo "No check script found for appwrite example"
+          
+          # Type check appwrite example
+          if [ -f "examples/appwrite/package.json" ]; then
+            cd examples/appwrite
+            if grep -q '"check"' package.json; then
+              pnpm run check
+            else
+              echo "No check script found for appwrite example"
+            fi
           fi
-        fi
 
   build-test:
     name: Build Test
@@ -134,16 +134,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 8
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'pnpm'
-        
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -165,14 +165,14 @@ jobs:
         test -f "out/preload/index.js" || (echo "❌ Missing preload/index.js" && exit 1)
         echo "✅ All required build files exist"
         
-    - name: Build appwrite example
-      run: |
-        if [ -f "examples/appwrite/package.json" ]; then
-          cd examples/appwrite
-          pnpm run build
-        else
-          echo "appwrite example not found"
-        fi
+          - name: Build appwrite example
+        run: |
+          if [ -f "examples/appwrite/package.json" ]; then
+            cd examples/appwrite
+            pnpm run build
+          else
+            echo "appwrite example not found"
+          fi
 
   lint:
     name: Lint Code
@@ -182,16 +182,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 8
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'pnpm'
-        
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile

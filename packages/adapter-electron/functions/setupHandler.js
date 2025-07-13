@@ -28,7 +28,7 @@ ${error.message}
 Stack trace:
 ${error.stack}
 
-Please report this issue at: https://github.com/your-repo/sveltekit-adapters/issues`;
+Please report this issue at: https://github.com/lukehagar/sveltekit-adapters/issues`;
 
   console.error(errorMessage);
 
