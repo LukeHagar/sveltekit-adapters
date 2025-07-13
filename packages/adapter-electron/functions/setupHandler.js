@@ -11,9 +11,9 @@ import { serialize as serializeCookie } from 'cookie';
 let server;
 let clientDir;
 let prerenderedDir;
-let Protocol = 'http';
-let Host = '127.0.0.1';
-let Origin = `${Protocol}://${Host}`;
+const Protocol = 'http';
+const Host = '127.0.0.1';
+const Origin = `${Protocol}://${Host}`;
 
 /**
  * Reports errors to the user in a way that can be filed on GitHub
