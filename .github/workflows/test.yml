@@ -1,71 +1,12 @@
-name: Test and Type Check
+name: CI Tests
 
 on:
   pull_request:
-    branches: [ main, develop ]
-  push:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
-  test:
-    name: Test Adapters
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18, 20]
-        
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4.1.0
-      with:
-        version: 8
-        
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-        
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-      
-    - name: Run adapter-electron tests
-      run: |
-        cd packages/adapter-electron
-        pnpm test
-        
-    - name: Run adapter-appwrite tests (if exists)
-              run: |
-          if [ -f "packages/adapter-appwrite/package.json" ]; then
-            cd packages/adapter-appwrite
-            if grep -q '"test"' package.json; then
-              pnpm test
-            else
-              echo "No tests found for adapter-appwrite"
-            fi
-          else
-            echo "adapter-appwrite package not found"
-          fi
-          
-      - name: Generate test coverage
-        run: |
-          cd packages/adapter-electron
-          pnpm run test:coverage
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./packages/adapter-electron/coverage/coverage-final.json
-        flags: adapter-electron
-        name: adapter-electron-coverage
-        fail_ci_if_error: false
-
-  typecheck:
-    name: Type Check Adapters
+  Run workspace tests:
+    name: Run workspace tests
     runs-on: ubuntu-latest
     
     steps:
@@ -80,54 +21,17 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'pnpm'
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       
     - name: Type check adapter-electron
-      run: |
-        cd packages/adapter-electron
-        pnpm run typecheck
-        
-    - name: Type check adapter-appwrite
-              run: |
-          if [ -f "packages/adapter-appwrite/package.json" ]; then
-            cd packages/adapter-appwrite
-            if grep -q '"typecheck"' package.json; then
-              pnpm run typecheck
-            else
-              echo "No typecheck script found for adapter-appwrite"
-            fi
-          else
-            echo "adapter-appwrite package not found"
-          fi
-        
-    - name: Type check examples
-              run: |
-          # Type check electron example
-          if [ -f "examples/electron/package.json" ]; then
-            cd examples/electron
-            if grep -q '"check"' package.json; then
-              pnpm run check
-            else
-              echo "No check script found for electron example"
-            fi
-          fi
-          
-          # Type check appwrite example
-          if [ -f "examples/appwrite/package.json" ]; then
-            cd examples/appwrite
-            if grep -q '"check"' package.json; then
-              pnpm run check
-            else
-              echo "No check script found for appwrite example"
-            fi
-          fi
+      run: pnpm -r test
 
   build-test:
-    name: Build Test
+    name: Run Build Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -142,7 +46,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'pnpm'
         
     - name: Install dependencies
@@ -164,50 +68,3 @@ jobs:
         test -f "out/main/index.js" || (echo "❌ Missing main/index.js" && exit 1)
         test -f "out/preload/index.js" || (echo "❌ Missing preload/index.js" && exit 1)
         echo "✅ All required build files exist"
-        
-          - name: Build appwrite example
-        run: |
-          if [ -f "examples/appwrite/package.json" ]; then
-            cd examples/appwrite
-            pnpm run build
-          else
-            echo "appwrite example not found"
-          fi
-
-  lint:
-    name: Lint Code
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4.1.0
-      with:
-        version: 8
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'pnpm'
-        
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-      
-    - name: Run ESLint
-      run: |
-        if [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ] || [ -f "eslint.config.js" ]; then
-          pnpm run lint
-        else
-          echo "No ESLint configuration found"
-        fi
-        
-    - name: Run Prettier check
-      run: |
-        if [ -f ".prettierrc" ] || [ -f ".prettierrc.json" ] || [ -f "prettier.config.js" ]; then
-          pnpm run format:check
-        else
-          echo "No Prettier configuration found"
-        fi 

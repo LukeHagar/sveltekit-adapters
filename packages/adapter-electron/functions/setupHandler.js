@@ -3,7 +3,6 @@ import path from 'node:path';
 import isDev from 'electron-is-dev';
 import { protocol, net, dialog, app } from 'electron';
 import { pathToFileURL } from 'url';
-import { Socket } from 'node:net';
 import assert from 'node:assert';
 import { parse as parseCookie, splitCookiesString } from 'set-cookie-parser';
 import { serialize as serializeCookie } from 'cookie';
@@ -42,6 +41,12 @@ Please report this issue at: https://github.com/lukehagar/sveltekit-adapters/iss
 }
 
 /**
+ * Gets the absolute path to the preload script
+ * 
+ * In development mode, points to the source preload script.
+ * In production, points to the built preload script.
+ * 
+ * @returns {string} Absolute path to the preload script
  * @type {import('./setupHandler.d').getPreloadPath}
  */
 export function getPreloadPath() {
@@ -55,6 +60,14 @@ export function getPreloadPath() {
 }
 
 /**
+ * Registers the HTTP scheme as privileged for Electron
+ * 
+ * This must be called before the app is ready. It configures the HTTP protocol
+ * to have standard web privileges including:
+ * - Standard scheme behavior
+ * - Secure context
+ * - Fetch API support
+ * 
  * @type {import('./setupHandler.d').registerAppScheme}
  */
 export function registerAppScheme() {
@@ -71,9 +84,20 @@ export function registerAppScheme() {
 }
 
 /**
+ * Converts an Electron protocol request to a Web API Request object
+ * 
+ * This function:
+ * 1. Extracts headers from the Electron request and normalizes them
+ * 2. Retrieves cookies from the session and adds them to headers
+ * 3. Handles request body data from uploadData or request.body
+ * 4. Creates a proper Web API Request object that SvelteKit expects
+ * 
+ * @param {GlobalRequest} request - The Electron protocol request object
+ * @param {Session} session - The Electron session for cookie access
+ * @returns {Promise<Request>} A Web API Request object compatible with SvelteKit
  * @type {import('./setupHandler.d').createRequest}
  */
-async function createRequest(request, session) {
+export async function createRequest(request, session) {
   try {
     const url = new URL(request.url);
 
@@ -131,6 +155,27 @@ async function createRequest(request, session) {
 }
 
 /**
+ * Sets up the protocol handler for serving SvelteKit app content
+ * 
+ * This function handles both development and production modes:
+ * 
+ * **Development Mode:**
+ * - Loads the dev server URL (VITE_DEV_SERVER or localhost:5173)
+ * - Returns early without protocol interception
+ * 
+ * **Production Mode:**
+ * - Initializes the SvelteKit server with the built app
+ * - Sets up directory paths for client assets and prerendered pages
+ * - Registers HTTP protocol handler that serves:
+ *   1. Static client assets (with caching headers)
+ *   2. Prerendered pages from the prerendered directory
+ *   3. SSR/API routes via the SvelteKit server
+ * - Synchronizes cookies between Electron session and SvelteKit responses
+ * - Validates requests to prevent external HTTP access
+ * - Protects against path traversal attacks
+ * 
+ * @param {BrowserWindow} mainWindow - The main Electron browser window
+ * @returns {Promise<() => void>} A cleanup function that unregisters the protocol handler
  * @type {import('./setupHandler.d').setupHandler}
  */
 export async function setupHandler(mainWindow) {
@@ -289,7 +334,13 @@ export async function setupHandler(mainWindow) {
   };
 }
 
-const fileExists = async (filePath) => {
+/**
+ * Checks if a file exists and is a regular file
+ * 
+ * @param {string} filePath - Path to the file to check
+ * @returns {Promise<boolean>} True if the file exists and is a regular file, false otherwise
+ */
+export const fileExists = async (filePath) => {
   try {
     return (await fs.stat(filePath)).isFile();
   } catch {
@@ -297,7 +348,13 @@ const fileExists = async (filePath) => {
   }
 };
 
-function getMimeType(filePath) {
+/**
+ * Determines the MIME type of a file based on its extension
+ * 
+ * @param {string} filePath - Path to the file
+ * @returns {string} The MIME type string, defaults to 'application/octet-stream' for unknown extensions
+ */
+export function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   const mimeTypes = {
     '.html': 'text/html',
@@ -334,10 +391,20 @@ function getMimeType(filePath) {
   return mimeTypes[ext] || 'application/octet-stream';
 }
 
-// Helper to check for directory traversal
-const isSafePath = (base, target) => {
+/**
+ * Validates that a target path is safe relative to a base directory
+ * 
+ * Prevents directory traversal attacks by ensuring the target path:
+ * - Is within the base directory (no .. traversal)
+ * - Is not an absolute path outside the base
+ * 
+ * @param {string} base - The base directory path
+ * @param {string} target - The target file path to validate
+ * @returns {boolean} True if the path is safe, false if it's a potential security risk
+ */
+export const isSafePath = (base, target) => {
   const relative = path.relative(base, target);
-  const safe = relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+  const safe = !relative || (!relative.startsWith('..') && !path.isAbsolute(relative));
   if (!safe) {
     reportError(new Error(`Unsafe path detected: base=${base}, target=${target}, relative=${relative}`), 'Path traversal attempt');
   }

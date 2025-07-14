@@ -108,15 +108,7 @@ describe('Protocol Handler Utils', () => {
     beforeEach(async () => {
       // Import the function after mocks are set up
       const module = await import('../../functions/setupHandler.js');
-      // We need to extract the function from the module since it's not exported
-      // This is a test-specific workaround
-      const moduleString = module.default?.toString() || '';
-      // For testing purposes, we'll create a simple implementation
-      isSafePath = (base, target) => {
-        const path = require('node:path');
-        const relative = path.relative(base, target);
-        return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
-      };
+      isSafePath = module.isSafePath;
     });
 
     it('should allow safe relative paths', () => {
@@ -136,7 +128,7 @@ describe('Protocol Handler Utils', () => {
     });
 
     it('should handle edge cases', () => {
-      expect(isSafePath('/base', '/base')).toBe(false); // No relative path
+      expect(isSafePath('/base', '/base')).toBe(true); // No relative path
       expect(isSafePath('/base', '/base/')).toBe(true); // Empty relative path is ok
     });
   });
