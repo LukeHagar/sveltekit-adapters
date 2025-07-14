@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  Run workspace tests:
+  run-workspace-tests:
     name: Run workspace tests
     runs-on: ubuntu-latest
     
@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       
-    - name: Type check adapter-electron
+    - name: Run workspace tests
       run: pnpm -r test
 
   build-test:
