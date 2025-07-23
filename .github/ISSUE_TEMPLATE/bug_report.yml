@@ -1,0 +1,209 @@
+name: Bug Report
+description: Report a bug with SvelteKit Electron or Appwrite adapters
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please provide as much detail as possible to help us reproduce and fix the issue.
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Which adapter is affected?
+      description: Select the adapter you're having issues with
+      options:
+        - adapter-electron
+        - adapter-appwrite
+        - Both adapters
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is
+      placeholder: Tell us what happened!
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened instead
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: Error logs
+      description: If applicable, paste any error messages or stack traces
+      placeholder: |
+        Paste error logs here...
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+      placeholder: Drag and drop screenshots here
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What OS are you running?
+      placeholder: e.g. Windows 11, macOS 14.1, Ubuntu 22.04
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: What version of Node.js are you using?
+      placeholder: e.g. 18.17.0, 20.9.0
+    validations:
+      required: true
+
+  - type: input
+    id: electron-version
+    attributes:
+      label: Electron version (if using adapter-electron)
+      description: What version of Electron are you using?
+      placeholder: e.g. 28.0.0, 29.1.0
+
+  - type: input
+    id: sveltekit-version
+    attributes:
+      label: SvelteKit version
+      description: What version of SvelteKit are you using?
+      placeholder: e.g. 2.0.0, 2.5.0
+    validations:
+      required: true
+
+  - type: input
+    id: adapter-version
+    attributes:
+      label: Adapter version
+      description: What version of the adapter are you using?
+      placeholder: e.g. 0.1.0, 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: In which environment does this issue occur?
+      options:
+        - Development (npm run dev)
+        - Production build (npm run build)
+        - Both development and production
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Please share your relevant configuration files
+      placeholder: |
+        svelte.config.js:
+        ```js
+        // paste your svelte.config.js here
+        ```
+        
+        vite.config.js:
+        ```js
+        // paste your vite.config.js here
+        ```
+        
+        package.json (relevant sections):
+        ```json
+        // paste relevant parts of package.json
+        ```
+      render: javascript
+
+  - type: textarea
+    id: minimal-reproduction
+    attributes:
+      label: Minimal reproduction
+      description: |
+        If possible, provide a minimal reproduction of the issue. This could be:
+        - A link to a GitHub repository
+        - A CodeSandbox/StackBlitz link
+        - Minimal code snippets
+      placeholder: |
+        Link to reproduction: https://github.com/...
+        
+        Or paste minimal code here:
+        ```js
+        // minimal reproduction code
+        ```
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: If you found a workaround, please describe it here
+      placeholder: Describe any workarounds you've found
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here
+      placeholder: |
+        Any additional information that might be helpful:
+        - Related issues
+        - Recent changes to your setup
+        - Browser console errors (if applicable)
+        - Network requests (if applicable)
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission checklist
+      description: Please check the following before submitting
+      options:
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: I have provided all the requested information above
+          required: true
+        - label: I have tested this with the latest version of the adapter
+          required: true
+        - label: I have included a minimal reproduction (if possible)
+          required: false 

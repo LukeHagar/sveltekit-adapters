@@ -3,25 +3,42 @@ import { Game } from './game';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load = (({ cookies }) => {
-	const game = new Game(cookies.get('sverdle'));
+	console.log("Loading game, getting cookie");
 
-	return {
-		/**
-		 * The player's guessed words so far
-		 */
-		guesses: game.guesses,
+	try {
+		const game = new Game(cookies.get('sverdle'));
 
-		/**
-		 * An array of strings like '__x_c' corresponding to the guesses, where 'x' means
-		 * an exact match, and 'c' means a close match (right letter, wrong place)
-		 */
-		answers: game.answers,
+		const gameState = {
+			/**
+			 * The player's guessed words so far
+			 */
+			guesses: game.guesses,
 
-		/**
-		 * The correct answer, revealed if the game is over
-		 */
-		answer: game.answers.length >= 6 ? game.answer : null
-	};
+			/**
+			 * An array of strings like '__x_c' corresponding to the guesses, where 'x' means
+			 * an exact match, and 'c' means a close match (right letter, wrong place)
+			 */
+			answers: game.answers,
+
+			/**
+			 * The correct answer, revealed if the game is over
+			 */
+			answer: game.answers.length >= 6 ? game.answer : null
+		}
+
+		console.log("Returning game state", gameState);
+
+		return gameState
+	} catch (e) {
+		console.error("Error loading game state:", e);
+		// Return a new game state as fallback
+		const newGame = new Game();
+		return {
+			guesses: newGame.guesses,
+			answers: newGame.answers,
+			answer: null
+		};
+	}
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -30,6 +47,7 @@ export const actions = {
 	 * is available, this will happen in the browser instead of here
 	 */
 	update: async ({ request, cookies }) => {
+		console.log("Updating game, getting cookie");
 		const game = new Game(cookies.get('sverdle'));
 
 		const data = await request.formData();
@@ -43,7 +61,9 @@ export const actions = {
 			game.guesses[i] += key;
 		}
 
-		cookies.set('sverdle', game.toString(), { path: '/' });
+		const gameString = game.toString();
+		console.log("Setting cookie", gameString);
+		cookies.set('sverdle', gameString, { path: '/' });
 	},
 
 	/**
@@ -51,19 +71,27 @@ export const actions = {
 	 * the server, so that people can't cheat by peeking at the JavaScript
 	 */
 	enter: async ({ request, cookies }) => {
-		const game = new Game(cookies.get('sverdle'));
+		console.log("Entering guess, getting cookie");
+		try {
+			const game = new Game(cookies.get('sverdle'));
 
-		const data = await request.formData();
-		const guess = data.getAll('guess') as string[];
+			const data = await request.formData();
+			const guess = data.getAll('guess') as string[];
 
-		if (!game.enter(guess)) {
-			return fail(400, { badGuess: true });
+			if (!game.enter(guess)) {
+				return fail(400, { badGuess: true });
+			}
+
+			const gameString = game.toString();
+			console.log("Setting cookie", gameString);
+			cookies.set('sverdle', gameString, { path: '/' });
+		} catch (e) {
+			console.log("Error entering guess", e);
 		}
-
-		cookies.set('sverdle', game.toString(), { path: '/' });
 	},
 
 	restart: async ({ cookies }) => {
+		console.log("Restarting game, deleting cookie");
 		cookies.delete('sverdle', { path: '/' });
 	}
 } satisfies Actions;

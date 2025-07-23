@@ -1,0 +1,130 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for SvelteKit adapters
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Which adapter is this feature for?
+      description: Select the adapter this feature request relates to
+      options:
+        - adapter-electron
+        - adapter-appwrite
+        - Both adapters
+        - New adapter
+        - General/Core
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen
+      placeholder: I would like...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered
+      placeholder: Alternatively, we could...
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: Describe your specific use case and how this feature would help
+      placeholder: |
+        I'm building an application that...
+        This feature would help by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation ideas
+      description: If you have ideas on how this could be implemented, please share them
+      placeholder: |
+        This could be implemented by...
+        
+        ```js
+        // Example API or code structure
+        ```
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Needed for my project
+        - Critical - Blocking my work
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Low - Simple configuration or small addition
+        - Medium - Moderate changes to existing code
+        - High - Significant changes or new architecture
+        - Not sure
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples from other tools
+      description: Are there similar features in other tools or frameworks that we could reference?
+      placeholder: |
+        Similar to how [tool] does [feature]...
+        Link: https://...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context, screenshots, or mockups about the feature request here
+      placeholder: |
+        Any additional information:
+        - Related issues or discussions
+        - Screenshots or mockups
+        - Links to relevant documentation
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission checklist
+      description: Please check the following before submitting
+      options:
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: I have provided a clear description of the problem and solution
+          required: true
+        - label: I have described my specific use case
+          required: true 

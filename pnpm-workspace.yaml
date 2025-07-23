@@ -1,3 +1,9 @@
 packages:
-  - "examples/*"
-  - "packages/*"
+  - examples/*
+  - packages/*
+
+onlyBuiltDependencies:
+  - electron
+  - electron-winstaller
+  - esbuild
+  - svelte-preprocess
