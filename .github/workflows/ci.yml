@@ -21,13 +21,16 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: setup node.js 20
-        uses: actions/setup-node@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.1.0
         with:
-          node-version: 20
-
-      - name: install pnpm
-        run: npm i pnpm@latest -g
+          version: 10
+            
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
 
       - name: install dependencies
         run: pnpm install
