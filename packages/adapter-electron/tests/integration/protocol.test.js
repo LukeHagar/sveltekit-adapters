@@ -514,7 +514,10 @@ describe('Protocol Integration', () => {
       const mockRequest = createMockRequest('http://evil.com/hack');
 
       // This should throw an assertion error
-      await expect(protocolHandler(mockRequest)).rejects.toThrow('External HTTP not supported, use HTTPS');
+      expect(protocolHandler(mockRequest)).resolves.toEqual(new Response('External HTTP not supported, use HTTPS instead', {
+        status: 400,
+        headers: { 'content-type': 'text/plain' }
+      }));
     });
 
     it('should handle path traversal attempts', async () => {
@@ -548,7 +551,10 @@ describe('Protocol Integration', () => {
 
       // This should throw an assertion error since it doesn't start with http://127.0.0.1
       const badRequest = createMockRequest('http://google.com/search');
-      await expect(protocolHandler(badRequest)).rejects.toThrow('External HTTP not supported, use HTTPS');
+      expect(protocolHandler(badRequest)).resolves.toEqual(new Response('External HTTP not supported, use HTTPS instead', {
+        status: 400,
+        headers: { 'content-type': 'text/plain' }
+      }));
     });
 
     it('should validate safe paths for static files', async () => {
