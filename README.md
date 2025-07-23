@@ -2,7 +2,17 @@
 
 This repo contains the below adapters and example implementations for each adapter.
 
-## Appwrite adapter
+- [SvelteKit Adapters](#sveltekit-adapters)
+  - [Adapters](#adapters)
+    - [Appwrite adapter](#appwrite-adapter)
+    - [Electron adapter](#electron-adapter)
+  - [What's inside?](#whats-inside)
+    - [Examples](#examples)
+    - [Packages](#packages)
+
+## Adapters
+
+### Appwrite adapter
 
 [Adapter](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-appwrite) | [Example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/appwrite)  
 
@@ -10,7 +20,7 @@ Deploy SvelteKit applications as appwrite functions.
 
 I have tested and validated the implementation with the node20 runtime. Other runtimes may work but have not been tested.
 
-## Electron adapter
+### Electron adapter
 
 [Adapter](https://github.com/LukeHagar/sveltekit-adapters/tree/main/packages/adapter-electron) | [Example](https://github.com/LukeHagar/sveltekit-adapters/tree/main/examples/electron)  
 
