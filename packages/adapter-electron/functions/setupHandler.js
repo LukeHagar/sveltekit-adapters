@@ -179,8 +179,13 @@ export async function createRequest(request, session) {
  * @type {import('./setupHandler.d').setupHandler}
  */
 export async function setupHandler(mainWindow) {
-  assert(mainWindow, 'mainWindow is required');
-  assert(mainWindow.webContents.session, 'mainWindow.webContents.session is required');
+  if (!mainWindow) {
+    throw new Error('mainWindow is required for setupHandler');
+  }
+
+  if (!mainWindow.webContents?.session) {
+    throw new Error('mainWindow.webContents.session is required for setupHandler');
+  }
 
   let url = process.env.VITE_DEV_SERVER || Origin
 
@@ -211,7 +216,12 @@ export async function setupHandler(mainWindow) {
       // Handle all http://127.0.0.1 requests
       protocol.handle(Protocol, async (request) => {
 
-        assert(request.url.startsWith(url), 'External HTTP not supported, use HTTPS');
+        if (!request.url.startsWith(url)) {
+          return new Response('External HTTP not supported, use HTTPS instead', {
+            status: 400,
+            headers: { 'content-type': 'text/plain' }
+          });
+        }
 
         const req = await createRequest(request, mainWindow.webContents.session);
 
@@ -315,9 +325,9 @@ export async function setupHandler(mainWindow) {
 
         } catch (error) {
           reportError(error, 'Protocol handler');
-          return new Response('Internal Server Error', { 
-            status: 500, 
-            headers: { 'content-type': 'text/plain' } 
+          return new Response('Internal Server Error', {
+            status: 500,
+            headers: { 'content-type': 'text/plain' }
           });
         }
       });
