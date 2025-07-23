@@ -6,6 +6,7 @@ import { rollup, watch as rollupWatch } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
+import typescript from '@rollup/plugin-typescript';
 
 /**
  * Build an Electron entrypoint (main or preload) using Rollup
@@ -21,7 +22,8 @@ async function buildEntryWithRollup(entry, outfile, external, isDev = false) {
     plugins: [
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
-      json()
+      json(),
+      typescript()
     ]
   };
   const outputOptions = {
@@ -114,7 +116,8 @@ export default function (opts = {}) {
           // @ts-ignore https://github.com/rollup/plugins/issues/1329
           commonjs({ strictRequires: true }),
           // @ts-ignore https://github.com/rollup/plugins/issues/1329
-          json()
+          json(),
+          typescript()
         ]
       });
 
