@@ -11,12 +11,13 @@
 	"main": "./out/main/index.cjs",
 	"scripts": {
 		"start": "vite preview",
-		"dev": "svelte-kit sync && concurrently \"vite dev\" \"electron .\" --names \"sveltekit,electron\" --prefix-colors \"#ff3e00,blue\"",
-		"build": "vite build",
-		"build:all": "npm run build && electron-builder -mwl --config",
-		"build:win": "npm run build && electron-builder --win --config",
-		"build:mac": "npm run build && electron-builder --mac --config",
-		"build:linux": "npm run build && electron-builder --linux --config"
+		"sync": "svelte-kit sync",
+		"dev": "pnpm sync && concurrently \"vite dev\" \"electron .\" --names \"sveltekit,electron\" --prefix-colors \"#ff3e00,blue\"",
+		"build": "pnpm sync && vite build",
+		"build:all": "pnpm build && electron-builder -mwl --config",
+		"build:win": "pnpm build && electron-builder --win --config",
+		"build:mac": "pnpm build && electron-builder --mac --config",
+		"build:linux": "pnpm build && electron-builder --linux --config"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^5.2.6",
