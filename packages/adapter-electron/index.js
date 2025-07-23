@@ -2,7 +2,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { rollup, watch as rollupWatch } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
