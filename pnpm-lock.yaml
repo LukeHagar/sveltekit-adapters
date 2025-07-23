@@ -216,6 +216,9 @@ importers:
       cookie:
         specifier: ^0.6.0
         version: 0.6.0
+      electron:
+        specifier: ^28.0.0
+        version: 28.3.3
       electron-is-dev:
         specifier: ^3.0.1
         version: 3.0.1
@@ -235,9 +238,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^1.0.0
         version: 1.6.1(vitest@1.6.1(@types/node@20.19.5))
-      electron:
-        specifier: ^28.0.0
-        version: 28.3.3
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
