@@ -64,6 +64,6 @@ jobs:
         test -d "out/client" || (echo "❌ Missing client directory" && exit 1)
         test -f "out/server/index.js" || (echo "❌ Missing server/index.js" && exit 1)
         test -f "out/server/manifest.js" || (echo "❌ Missing server/manifest.js" && exit 1)
-        test -f "out/main/index.js" || (echo "❌ Missing main/index.js" && exit 1)
+        test -f "out/main/index.cjs" || (echo "❌ Missing main/index.js" && exit 1)
         test -f "out/preload/index.js" || (echo "❌ Missing preload/index.js" && exit 1)
         echo "✅ All required build files exist"
