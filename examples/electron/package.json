@@ -12,7 +12,7 @@
 	"scripts": {
 		"start": "vite preview",
 		"sync": "svelte-kit sync",
-		"dev": "pnpm sync && concurrently \"vite dev\" \"electron .\" --names \"sveltekit,electron\" --prefix-colors \"#ff3e00,blue\"",
+		"dev": "pnpm sync && concurrently \"vite dev\" \"wait-on http://localhost:5173 && nodemon --watch out --exec electron .\" --names \"sveltekit,electron\" --prefix-colors \"#ff3e00,blue\"",
 		"build": "pnpm sync && vite build",
 		"build:all": "pnpm build && electron-builder -mwl --config",
 		"build:win": "pnpm build && electron-builder --win --config",
@@ -39,6 +39,8 @@
 		"electron-util": "^0.18.1",
 		"esbuild": "^0.25.0",
 		"eslint": "^9.30.1",
+		"nodemon": "^3.1.10",
+		"wait-on": "^8.0.4",
 		"eslint-config-prettier": "^10.1.5",
 		"eslint-plugin-svelte": "^3.10.1",
 		"polka": "^0.5.2",

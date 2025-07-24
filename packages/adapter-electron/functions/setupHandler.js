@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import isDev from 'electron-is-dev';
-import { protocol, net, dialog, app } from 'electron';
+import { protocol, net, dialog } from 'electron';
 import { pathToFileURL } from 'url';
-import assert from 'node:assert';
 import { parse as parseCookie, splitCookiesString } from 'set-cookie-parser';
 import { serialize as serializeCookie } from 'cookie';
 

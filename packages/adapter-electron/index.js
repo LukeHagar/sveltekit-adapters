@@ -1,6 +1,5 @@
 // adapter-electron.js
 import { readFileSync, writeFileSync } from 'node:fs';
-import fs from 'node:fs';
 import path from 'node:path';
 import { rollup, watch as rollupWatch } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -159,6 +158,7 @@ export default function (opts = {}) {
 /**
  * Vite plugin to build Electron main/preload files using Rollup
  * Usage: import { electronPlugin } from 'adapter-electron'
+ * @param {import('./index.d.ts').ElectronPluginOptions} options - Configuration options
  */
 export function electronPlugin(options = {}) {
   const {

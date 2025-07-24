@@ -16,7 +16,7 @@ A SvelteKit adapter for Electron desktop apps that uses native protocol handling
 ## Installation
 
 ```bash
-npm install @sveltejs/adapter-electron
+npm install adapter-electron
 ```
 
 ## Quick Start
@@ -26,19 +26,15 @@ npm install @sveltejs/adapter-electron
 In your `svelte.config.js`:
 
 ```js
-import adapter from '@sveltejs/adapter-electron';
+import adapter from 'adapter-electron';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+	preprocess: vitePreprocess(),
+
 	kit: {
-		adapter: adapter({
-			// All options are optional with sensible defaults
-			out: 'out',                    // Output directory (default: 'out')
-			assets: true,                  // Include static assets (default: true)
-			fallback: undefined,           // Fallback page for client-side routing (default: undefined)
-			precompress: false,            // Precompress assets (default: false)
-			strict: true                   // Strict mode (default: true)
-		})
+		adapter: adapter()
 	}
 };
 
@@ -77,31 +73,44 @@ Create `src/main.ts`:
 import { app, BrowserWindow } from 'electron';
 import { setupHandler, getPreloadPath, registerAppScheme } from 'adapter-electron/functions/setupHandler';
 
+// Electron log is the best way I've found to get logs from compiled binaries
+import log from 'electron-log/main';
+
+console.log = log.log;
+
 let mainWindow: BrowserWindow | null = null;
 let stopIntercept: (() => void) | undefined;
 
-// IMPORTANT: Register the app scheme before app.ready
+process.on('SIGTERM', () => process.exit(0));
+process.on('SIGINT', () => process.exit(0));
+
+// First register the app scheme
 registerAppScheme();
 
 async function createWindow() {
+	// Create the browser window
 	mainWindow = new BrowserWindow({
 		width: 1200,
 		height: 800,
 		webPreferences: {
-			preload: getPreloadPath(),  // Auto-configured preload path
+			// Second configure the preload script
+			preload: getPreloadPath(),
 			contextIsolation: true,
-			nodeIntegration: false,
-			webSecurity: true
+			devTools: true
 		}
 	});
+
+	mainWindow.once('ready-to-show', () => mainWindow?.webContents.openDevTools());
 
 	mainWindow.on('closed', () => {
 		mainWindow = null;
 		stopIntercept?.();
 	});
 
-	// Setup the protocol handler (handles dev vs prod automatically)
+	// Third, Setup the handler
 	stopIntercept = await setupHandler(mainWindow);
+
+	return mainWindow;
 }
 
 app.on('ready', createWindow);
@@ -114,7 +123,11 @@ app.on('window-all-closed', () => {
 
 app.on('activate', async () => {
 	if (BrowserWindow.getAllWindows().length === 0 && !mainWindow) {
-		await createWindow();
+		try {
+			await createWindow();
+		} catch (error) {
+			console.error('Failed to create window:', error);
+		}
 	}
 });
 ```
@@ -124,18 +137,29 @@ app.on('activate', async () => {
 Create `src/preload.ts`:
 
 ```ts
-// Your preload script content
 console.log('Preload loaded');
-
-// Example: Expose APIs to renderer process
-import { contextBridge } from 'electron';
-
-contextBridge.exposeInMainWorld('electronAPI', {
-	// Your APIs here
-});
 ```
 
-### 5. Build and Run
+### 5. Configure Package.json
+
+Add these fields to your `package.json`:
+
+```json
+{
+  "main": "./out/main/index.cjs",
+  "scripts": {
+    "sync": "svelte-kit sync",
+	"dev": "pnpm sync && concurrently \"vite dev\" \"wait-on http://localhost:5173 && nodemon --watch out --exec electron .\" --names \"sveltekit,electron\" --prefix-colors \"#ff3e00,blue\"",
+    "build": "pnpm sync && vite build",
+    "build:all": "pnpm build && electron-builder -mwl --config",
+    "build:win": "pnpm build && electron-builder --win --config",
+    "build:mac": "pnpm build && electron-builder --mac --config",
+    "build:linux": "pnpm build && electron-builder --linux --config"
+  }
+}
+```
+
+### 6. Build and Run
 
 ```bash
 # Development (uses Vite dev server with HMR)
@@ -144,8 +168,11 @@ npm run dev
 # Production build
 npm run build
 
-# Run built Electron app
-npm start  # or your preferred Electron launcher
+# Package for distribution
+npm run build:all  # All platforms
+npm run build:win  # Windows only
+npm run build:mac  # macOS only
+npm run build:linux # Linux only
 ```
 
 ## How It Works
@@ -192,31 +219,94 @@ out/
 
 ```js
 adapter({
-	out: 'out',              // Output directory
-	assets: true,            // Include static assets from /static
-	fallback: undefined,     // Fallback page for client-side routing
-	precompress: false,      // Precompress assets with gzip/brotli
-	strict: true             // Enable strict mode
+	out: 'out',              // Output directory (default: 'out')
+	precompress: false       // Precompress assets with gzip/brotli (default: false)
 })
 ```
+
+| Option        | Type      | Default | Description                                     |
+| ------------- | --------- | ------- | ----------------------------------------------- |
+| `out`         | `string`  | `'out'` | The directory to write the built application to |
+| `precompress` | `boolean` | `false` | Whether to precompress assets with gzip/brotli  |
 
 ### Electron Plugin Options
 
 ```js
 electronPlugin({
-	mainEntry: 'src/main.ts',           // Main process entry point
-	preloadEntry: 'src/preload.ts',     // Preload script entry point  
-	mainOut: 'out/main/index.js',       // Main process output
-	preloadOut: 'out/preload/index.js'  // Preload script output
+	mainEntry: 'src/main.ts',           // Main process entry point (default: 'src/main.ts')
+	preloadEntry: 'src/preload.ts',     // Preload script entry point (default: 'src/preload.ts')
+	mainOut: 'out/main/index.cjs',      // Main process output (default: 'out/main/index.cjs')
+	preloadOut: 'out/preload/index.js', // Preload script output (default: 'out/preload/index.js')
+	externalMain: ['electron', 'electron-log', 'electron-is-dev', 'SERVER', 'MANIFEST'], // External dependencies for main process
+	externalPreload: ['electron']       // External dependencies for preload script
 })
+```
+
+| Option            | Type       | Default                                                                 | Description                                                        |
+| ----------------- | ---------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `mainEntry`       | `string`   | `'src/main.ts'`                                                         | Path to the main process entry file                                |
+| `preloadEntry`    | `string`   | `'src/preload.ts'`                                                      | Path to the preload script entry file                              |
+| `mainOut`         | `string`   | `'out/main/index.cjs'`                                                  | Output path for the compiled main process                          |
+| `preloadOut`      | `string`   | `'out/preload/index.js'`                                                | Output path for the compiled preload script                        |
+| `externalMain`    | `string[]` | `['electron', 'electron-log', 'electron-is-dev', 'SERVER', 'MANIFEST']` | External dependencies that won't be bundled for the main process   |
+| `externalPreload` | `string[]` | `['electron']`                                                          | External dependencies that won't be bundled for the preload script |
+
+### Configuration Examples
+
+#### Custom Output Directory
+```js
+// svelte.config.js
+import adapter from 'adapter-electron';
+
+export default {
+	kit: {
+		adapter: adapter({
+			out: 'dist/electron'
+		})
+	}
+};
+```
+
+#### Custom Entry Points
+```js
+// vite.config.ts
+import { electronPlugin } from 'adapter-electron';
+
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		electronPlugin({
+			mainEntry: 'electron/main.ts',
+			preloadEntry: 'electron/preload.ts',
+			mainOut: 'dist/electron/main.js',
+			preloadOut: 'dist/electron/preload.js'
+		})
+	]
+});
+```
+
+#### Custom External Dependencies
+```js
+// vite.config.ts
+import { electronPlugin } from 'adapter-electron';
+
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		electronPlugin({
+			externalMain: ['electron', 'electron-log', 'my-custom-package'],
+			externalPreload: ['electron', 'another-package']
+		})
+	]
+});
 ```
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable          | Description            | Default                 |
+| ----------------- | ---------------------- | ----------------------- |
 | `VITE_DEV_SERVER` | Development server URL | `http://localhost:5173` |
-| `VITE_APP_URL` | Production app URL | `http://127.0.0.1` |
+| `VITE_APP_URL`    | Production app URL     | `http://127.0.0.1`      |
 
 ## API Reference
 
@@ -288,29 +378,54 @@ Cookies are automatically synchronized between SvelteKit and Electron's session:
 
 ### With electron-builder
 
-```json
-{
-  "scripts": {
-    "build": "vite build",
-    "dist": "npm run build && electron-builder"
-  },
-  "build": {
-    "directories": {
-      "output": "dist",
-      "buildResources": "out"
-    },
-    "files": [
-      "out/**/*",
-      "package.json"
-    ],
-    "mac": {
-      "icon": "assets/icon.icns"
-    },
-    "win": {
-      "icon": "assets/icon.ico"
-    }
-  }
-}
+Create `electron-builder.yaml`:
+
+```yaml
+appId: com.electron.app
+productName: electron-sveltekit
+directories:
+  buildResources: build
+files:
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!vite.electron.config.ts"
+  - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+  - "out/**/*"
+asarUnpack:
+  - resources/**
+win:
+  target: ["portable"]
+  executableName: electron-sveltekit
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+dmg:
+  artifactName: ${name}-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - snap
+    - deb
+  maintainer: electronjs.org
+  category: Utility
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: generic
+  url: https://example.com/auto-updates
 ```
 
 ### With electron-forge
@@ -328,6 +443,15 @@ module.exports = {
     }
   ]
 };
+```
+
+## Dependencies
+
+The adapter requires these additional dependencies:
+
+```bash
+npm install electron electron-builder electron-log concurrently
+npm install -D @types/node
 ```
 
 ## Troubleshooting
@@ -349,6 +473,7 @@ module.exports = {
 **Build errors:**
 - Verify all dependencies are installed
 - Check that TypeScript configuration includes Electron types
+- Ensure `concurrently` is installed for development scripts
 
 ### Debug Mode
 

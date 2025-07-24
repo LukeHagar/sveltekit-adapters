@@ -13,6 +13,7 @@ process.on('SIGINT', () => process.exit(0));
 // First register the app scheme
 registerAppScheme();
 
+console.log('main.ts is now loaded');
 
 async function createWindow() {
 	// Create the browser window

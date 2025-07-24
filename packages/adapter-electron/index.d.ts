@@ -6,12 +6,6 @@ export interface AdapterOptions {
    * @default 'out'
    */
   out?: string;
-  
-  /**
-   * Directory name for the protocol handler functions
-   * @default 'functions'
-   */
-  functions?: string;
 
   /**
    * Whether to precompress static assets
