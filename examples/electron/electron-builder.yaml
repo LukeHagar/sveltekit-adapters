@@ -6,13 +6,16 @@ files:
   - "!**/.vscode/*"
   - "!src/*"
   - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!vite.electron.config.ts"
   - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+  - "out/**/*"
 asarUnpack:
   - resources/**
 # afterSign: build/notarize.js
 win:
+  target: ["portable"]
   executableName: electron-sveltekit
 nsis:
   artifactName: ${name}-${version}-setup.${ext}

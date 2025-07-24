@@ -1,0 +1,69 @@
+name: CI Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-workspace-tests:
+    name: Run workspace tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 8
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run workspace tests
+      run: pnpm -r test
+
+  build-test:
+    name: Run Build Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4.1.0
+      with:
+        version: 10
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Build electron example
+      run: |
+        cd examples/electron
+        pnpm run build
+        
+    - name: Validate build output
+      run: |
+        cd examples/electron
+        # Check that required files exist
+        test -d "out/client" || (echo "❌ Missing client directory" && exit 1)
+        test -f "out/server/index.js" || (echo "❌ Missing server/index.js" && exit 1)
+        test -f "out/server/manifest.js" || (echo "❌ Missing server/manifest.js" && exit 1)
+        test -f "out/main/index.cjs" || (echo "❌ Missing main/index.js" && exit 1)
+        test -f "out/preload/index.js" || (echo "❌ Missing preload/index.js" && exit 1)
+        echo "✅ All required build files exist"
