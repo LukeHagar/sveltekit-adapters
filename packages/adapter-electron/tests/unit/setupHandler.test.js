@@ -67,8 +67,8 @@ describe('Protocol Handler Utils', () => {
     it('should return correct MIME types for common file extensions', () => {
       expect(getMimeType('file.html')).toBe('text/html');
       expect(getMimeType('file.htm')).toBe('text/html');
-      expect(getMimeType('file.js')).toBe('application/javascript');
-      expect(getMimeType('file.mjs')).toBe('application/javascript');
+      expect(getMimeType('file.js')).toBe('text/javascript');
+      expect(getMimeType('file.mjs')).toBe('text/javascript');
       expect(getMimeType('file.css')).toBe('text/css');
       expect(getMimeType('file.json')).toBe('application/json');
     });
@@ -97,7 +97,7 @@ describe('Protocol Handler Utils', () => {
 
     it('should handle case insensitive extensions', () => {
       expect(getMimeType('FILE.HTML')).toBe('text/html');
-      expect(getMimeType('FILE.JS')).toBe('application/javascript');
+      expect(getMimeType('FILE.JS')).toBe('text/javascript');
       expect(getMimeType('FILE.CSS')).toBe('text/css');
     });
   });
