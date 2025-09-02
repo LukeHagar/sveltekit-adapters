@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import mrmime from 'mrmime';
 import path from 'node:path';
 import isDev from 'electron-is-dev';
 import { protocol, net, dialog } from 'electron';
@@ -365,39 +366,7 @@ export const fileExists = async (filePath) => {
  */
 export function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
-  const mimeTypes = {
-    '.html': 'text/html',
-    '.htm': 'text/html',
-    '.js': 'application/javascript',
-    '.mjs': 'application/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon',
-    '.woff': 'font/woff',
-    '.woff2': 'font/woff2',
-    '.ttf': 'font/ttf',
-    '.eot': 'application/vnd.ms-fontobject',
-    '.otf': 'font/otf',
-    '.webp': 'image/webp',
-    '.avif': 'image/avif',
-    '.mp4': 'video/mp4',
-    '.webm': 'video/webm',
-    '.mp3': 'audio/mpeg',
-    '.wav': 'audio/wav',
-    '.pdf': 'application/pdf',
-    '.zip': 'application/zip',
-    '.txt': 'text/plain',
-    '.md': 'text/markdown',
-    '.xml': 'application/xml',
-    '.csv': 'text/csv'
-  };
-
-  return mimeTypes[ext] || 'application/octet-stream';
+  return mrmime.lookup(ext) || 'application/octet-stream';
 }
 
 /**
