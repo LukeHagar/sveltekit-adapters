@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import mrmime from 'mrmime';
+import { lookup } from 'mrmime';
 import path from 'node:path';
 import isDev from 'electron-is-dev';
 import { protocol, net, dialog } from 'electron';
@@ -366,7 +366,7 @@ export const fileExists = async (filePath) => {
  */
 export function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
-  return mrmime.lookup(ext) || 'application/octet-stream';
+  return lookup(ext) || 'application/octet-stream';
 }
 
 /**
