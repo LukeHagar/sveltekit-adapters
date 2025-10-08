@@ -52,7 +52,7 @@ export function getPreloadPath() {
   let preloadPath = path.resolve(path.join(__dirname, 'PRELOAD'))
 
   if (isDev) {
-    preloadPath = path.resolve(path.join(__dirname, '..', 'preload', 'index.js'))
+    preloadPath = path.resolve(path.join(__dirname, '..', 'preload', 'index.cjs'))
   }
 
   return preloadPath;
