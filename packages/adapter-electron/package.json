@@ -1,6 +1,6 @@
 {
 	"name": "adapter-electron",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "A SvelteKit adapter for Electron Desktop Apps using protocol interception",
 	"author": {
 		"name": "Luke Hagar",
