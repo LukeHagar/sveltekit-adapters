@@ -1,4 +1,4 @@
-# @sveltejs/adapter-electron
+# adapter-electron
 
 A SvelteKit adapter for Electron desktop apps that uses native protocol handling for production and seamless Vite dev server integration for development.
 
